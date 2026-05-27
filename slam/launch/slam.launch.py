@@ -42,6 +42,7 @@ def generate_launch_description():
         name="slam_toolbox",
         output="screen",
         namespace="",
+        remappings=[("map", "/map_lidar")],
         parameters=[
             slam_params_file_w_subst,
             {"use_sim_time": use_sim_time},
