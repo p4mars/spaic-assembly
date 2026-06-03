@@ -9,10 +9,10 @@
 namespace
 {
 const std::map<std::string, double> carry_pose = {
-  {"shoulder_pan_joint", 0.00022788182014732428},
-  {"shoulder_lift_joint", 0.08524623344398141},
-  {"elbow_joint", -0.05947614807949897},
-  {"wrist_joint", -1.56},
+  {"shoulder_pan_joint", 0.0},
+  {"shoulder_lift_joint", -0.1},
+  {"elbow_joint", -1.50},
+  {"wrist_joint", -1.55},
 };
 }
 
