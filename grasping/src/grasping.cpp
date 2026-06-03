@@ -17,9 +17,9 @@ const std::map<std::string, double> carry_pose = {
 
 const std::map<std::string, double> grasp_pose = {
   {"shoulder_pan_joint", 0.0},
-  {"shoulder_lift_joint", -0.99},
-  {"elbow_joint", -1.73},
-  {"wrist_joint", -0.35},
+  {"shoulder_lift_joint", -1.29},
+  {"elbow_joint", -0.92},
+  {"wrist_joint", -0.96},
 };
 }
 
