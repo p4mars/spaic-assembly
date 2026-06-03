@@ -12,4 +12,10 @@ def generate_launch_description():
 		)
 	)
 
-	return LaunchDescription([slam_launch])
+	grasping_launch = IncludeLaunchDescription(
+		PythonLaunchDescriptionSource(
+			PathJoinSubstitution([FindPackageShare("grasping"), "launch", "grasping.launch.py"])
+		)
+	)
+
+	return LaunchDescription([slam_launch, grasping_launch])
