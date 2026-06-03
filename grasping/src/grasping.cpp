@@ -14,6 +14,13 @@ const std::map<std::string, double> carry_pose = {
   {"elbow_joint", -1.50},
   {"wrist_joint", -1.55},
 };
+
+const std::map<std::string, double> grasp_pose = {
+  {"shoulder_pan_joint", 0.0},
+  {"shoulder_lift_joint", -0.99},
+  {"elbow_joint", -1.73},
+  {"wrist_joint", -0.35},
+};
 }
 
 class GraspingServices
@@ -54,6 +61,12 @@ public:
       [this](const std::shared_ptr<Trigger::Request>, std::shared_ptr<Trigger::Response> response) {
         move_arm_to_carry_pose(response);
       });
+
+    move_to_grasp_pose_service_ = node_->create_service<Trigger>(
+      "move_to_grasp_pose",
+      [this](const std::shared_ptr<Trigger::Request>, std::shared_ptr<Trigger::Response> response) {
+        move_arm_to_grasp_pose(response);
+      });
   }
 
 private:
@@ -63,6 +76,7 @@ private:
   rclcpp::Service<Trigger>::SharedPtr open_gripper_service_;
   rclcpp::Service<Trigger>::SharedPtr close_gripper_service_;
   rclcpp::Service<Trigger>::SharedPtr move_to_carry_pose_service_;
+  rclcpp::Service<Trigger>::SharedPtr move_to_grasp_pose_service_;
 
   bool move_gripper(
     const std::string target,
@@ -93,6 +107,20 @@ private:
 
     response->success = true;
     response->message = "moved to carry pose";
+    return true;
+  }
+
+  bool move_arm_to_grasp_pose(const std::shared_ptr<Trigger::Response> & response)
+  {
+    arm_interface_.setJointValueTarget(grasp_pose);
+    if (!arm_interface_.move()) {
+      response->success = false;
+      response->message = "failed to move to grasp pose";
+      return false;
+    }
+
+    response->success = true;
+    response->message = "moved to grasp pose";
     return true;
   }
 };
