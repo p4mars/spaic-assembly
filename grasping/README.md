@@ -11,9 +11,9 @@ ros2 launch grasping grasping.launch.py sim:=true
 
 Call actions/services:
 ```bash
-ros2 action send_goal /pick_tile grasping/action/PickTile "{pos: {header: {frame_id: map}, point: {x: ?.?, y: ?.?, z: ?.?}}}" --feedback
+ros2 action send_goal /pick_tile grasping/action/PickTile "{pos: {header: {frame_id: base_link}, point: {x: 0.37, y: 0.0, z: -0.1}}}" --feedback
 
-ros2 action send_goal /drop_tile grasping/action/DropTile "{pos: {header: {frame_id: map}, point: {x: ?.?, y: ?.?, z: ?.?}}}" --feedback
+ros2 action send_goal /drop_tile grasping/action/DropTile "{pos: {header: {frame_id: base_link}, point: {x: 0.37, y: 0.0, z: -0.1}}}" --feedback
 
 ros2 service call /move_to_detection_pose std_srvs/srv/Trigger
 ```
