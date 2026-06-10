@@ -11,9 +11,9 @@ from std_msgs.msg import String, Int32
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 from nav2_msgs.action import NavigateToPose
 from ament_index_python.packages import get_package_share_directory
-from mirte_location_markers_msgs.srv import MoveTo
-from mirte_location_markers_msgs.srv import MoveForward
-from mirte_location_markers_msgs.srv import RotateCCW
+from mirte_location_markers.srv import MoveTo
+from mirte_location_markers.srv import MoveForward
+from mirte_location_markers.srv import RotateCCW
 
 # --- TF for transforming detections to the map frame ---
 from tf2_ros import Buffer, TransformListener
