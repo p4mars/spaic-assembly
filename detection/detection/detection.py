@@ -98,8 +98,12 @@ class DetectionNode(Node):
 
         self.declare_parameter('camera_info_topic', '/gripper_camera/camera_info')
         self.declare_parameter('use_hardcoded_camera_info', True)
-        self.declare_parameter('fallback_camera_k', [540.0, 0.0, 320.0, 0.0, 540.0, 240.0, 0.0, 0.0, 1.0]) # camera matrix
-        self.declare_parameter('fallback_camera_d', [0.0, 0.0, 0.0, 0.0, 0.0]) # camera distortion (Radial Distortion (3) & Tangential Distortion (2))
+        #self.declare_parameter('fallback_camera_k', [540.0, 0.0, 320.0, 0.0, 540.0, 240.0, 0.0, 0.0, 1.0]) # camera matrix
+        #self.declare_parameter('fallback_camera_d', [0.0, 0.0, 0.0, 0.0, 0.0]) # camera distortion (Radial Distortion (3) & Tangential Distortion (2))
+        # calibrated
+        self.declare_parameter('fallback_camera_k', [827.01, 0.0, 306.50, 0.0, 817.84, 221.24, 0.0, 0.0, 1.0]) # camera matrix
+        self.declare_parameter('fallback_camera_d', [-1.147382, 21.242253, 0.013422, 0.000006, -147.716365]) # camera distortion (Radial Distortion (3) & Tangential Distortion (2))
+
 
         self.declare_parameter('process_every_n', 6)
         self.declare_parameter('aruco_dict', 'DICT_4X4_1000')
