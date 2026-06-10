@@ -5,7 +5,6 @@ from sensor_msgs.msg import Image, CompressedImage, CameraInfo
 from geometry_msgs.msg import TransformStamped
 from geometry_msgs.msg import PoseStamped
 
-
 from std_msgs.msg import Int32, Int32MultiArray # for custom msg
 
 import cv2
@@ -328,20 +327,20 @@ class DetectionNode(Node):
             f"[DEBUG] Marker {marker_id} in map: "
             f"x={pos.x:.3f}  y={pos.y:.3f}  z={pos.z:.3f}"
         )
-
+        # AMar
         pose_msg = PoseStamped()
         pose_msg.header.stamp = self.get_clock().now().to_msg()
         pose_msg.header.frame_id = 'map'
         pose_msg.pose.position.x = pos.x
         pose_msg.pose.position.y = pos.y
-        pose_msg.pose.position.z = pos.z
+        pose_msg.pose.position.z = marker_id  # z value not required really, so we use it as marker_id field
         pose_msg.pose.orientation = rotation
         self._marker_pose_pub.publish(pose_msg)
 
         # Success signal — the nav node listens to this
-        found_msg = Int32()
-        found_msg.data = int(marker_id)
-        self._found_marker_pub.publish(found_msg)
+        #found_msg = Int32()
+        #found_msg.data = int(marker_id)
+        #self._found_marker_pub.publish(found_msg)
 
 
 
