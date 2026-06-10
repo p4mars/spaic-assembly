@@ -27,7 +27,7 @@ from rclpy.node import Node
 from rclpy.action import ActionClient
 from rclpy.executors import MultiThreadedExecutor
 
-from std_msgs.msg import String, Int32, Int32MultiArray
+from std_msgs.msg import String, Int32MultiArray
 from geometry_msgs.msg import PointStamped, PoseStamped
 
 from mirte_location_markers_msgs.srv import MoveTo
@@ -71,8 +71,6 @@ class Orchestrator(Node):
         self._found = threading.Event()
         self.create_subscription(
             PoseStamped, '/detection/marker_pose', self._on_marker_pose, 10)
-        self.create_subscription(
-            Int32, '/detection/found_marker_id', self._on_found, 10)
 
         # --- grasping ---------------------------------------------------
         self.pick_cli = ActionClient(self, PickTile, 'pick_tile')
@@ -96,17 +94,15 @@ class Orchestrator(Node):
             self._nav_done.set()
 
     def _on_marker_pose(self, msg: PoseStamped):
-        self._last_pose = msg
+        if int(msg.pose.position.z) == self._want_id:
+            self._last_pose = msg
+            self._found.set()
 
     def _on_control(self, msg: String):
         key = msg.data.strip().lower()[:1]
         if key in ('r', 's', 'q'):
             self._ctrl_key = key
             self._ctrl_event.set()
-
-    def _on_found(self, msg: Int32):
-        if msg.data == self._want_id:
-            self._found.set()
 
     # ==================================================================
     # Phases -- each returns True on success, False on failure.
