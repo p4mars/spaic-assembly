@@ -19,7 +19,6 @@ Interfaces it drives (already implemented by teammates):
   * grasping   : ``pick_tile`` / ``drop_tile`` actions (grasping/PickTile,DropTile),
                  goal is a geometry_msgs/PointStamped.
 """
-import sys
 import time
 import threading
 
@@ -79,6 +78,11 @@ class Orchestrator(Node):
         self.pick_cli = ActionClient(self, PickTile, 'pick_tile')
         self.drop_cli = ActionClient(self, DropTile, 'drop_tile')
 
+        # --- operator control -------------------------------------------
+        self._ctrl_key: str | None = None
+        self._ctrl_event = threading.Event()
+        self.create_subscription(String, '/orchestrator/control', self._on_control, 10)
+
     # ==================================================================
     # Subscriber callbacks (run in the executor thread)
     # ==================================================================
@@ -93,6 +97,12 @@ class Orchestrator(Node):
 
     def _on_marker_pose(self, msg: PoseStamped):
         self._last_pose = msg
+
+    def _on_control(self, msg: String):
+        key = msg.data.strip().lower()[:1]
+        if key in ('r', 's', 'q'):
+            self._ctrl_key = key
+            self._ctrl_event.set()
 
     def _on_found(self, msg: Int32):
         if msg.data == self._want_id:
@@ -211,16 +221,16 @@ class Orchestrator(Node):
             return False  # 'q'
 
     def _prompt(self, name: str) -> str:
-        sys.stdout.write(
+        self._ctrl_event.clear()
+        self._ctrl_key = None
+        self.get_logger().info(
             f"\n[FAILED] {name}\n"
-            f"  [r] retry   [s] skip (assume success)   [q] quit mission\n> ")
-        sys.stdout.flush()
-        while True:
-            key = _read_key().lower()
-            if key in ('r', 's', 'q'):
-                sys.stdout.write(key + "\n")
-                sys.stdout.flush()
-                return key
+            f"  Publish to /orchestrator/control: 'r' retry  's' skip  'q' quit\n"
+            f"  e.g.: ros2 topic pub --once /orchestrator/control std_msgs/String \"data: 'r'\"")
+        self._ctrl_event.wait()
+        key = self._ctrl_key
+        self.get_logger().info(f"Operator chose: {key}")
+        return key
 
     def _run_action(self, client: ActionClient, goal, label: str) -> bool:
         if not client.wait_for_server(timeout_sec=5.0):
@@ -254,20 +264,6 @@ class Orchestrator(Node):
             time.sleep(0.02)
         return True
 
-
-def _read_key() -> str:
-    """Read a single keypress without waiting for Enter (falls back to input())."""
-    if not sys.stdin.isatty():
-        return (sys.stdin.readline().strip()[:1] or '\n')
-    import termios
-    import tty
-    fd = sys.stdin.fileno()
-    old = termios.tcgetattr(fd)
-    try:
-        tty.setraw(fd)
-        return sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
 
 def main(args=None):
