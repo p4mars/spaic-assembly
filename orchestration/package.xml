@@ -10,9 +10,7 @@
   <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
-  <!-- MoveTo.srv -->
-  <exec_depend>mirte_location_markers</exec_depend>
-  <!-- PickTile.action / DropTile.action -->
+  <exec_depend>mirte_location_markers_msgs</exec_depend>
   <exec_depend>grasping</exec_depend>
 
   <test_depend>python3-pytest</test_depend>
