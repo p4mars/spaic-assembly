@@ -31,7 +31,7 @@ from rclpy.executors import MultiThreadedExecutor
 from std_msgs.msg import String, Int32, Int32MultiArray
 from geometry_msgs.msg import PointStamped, PoseStamped
 
-from mirte_location_markers.srv import MoveTo
+from mirte_location_markers_msgs.srv import MoveTo
 from grasping.action import PickTile, DropTile
 
 # Named locations the navigation node understands (move_to(location=...)).
@@ -39,15 +39,14 @@ PICK_LOCATION = 'pickup'
 DROP_LOCATION = 'drop'
 
 # The mission: for each tile (ArUco id) where to drop it, as (x, y, z) in the
-# 'map' frame. Order of this dict = order tiles are processed. The pick pose is
+# 'base_link' frame when the robot is at the DROP_LOCATION. Order of this dict = order tiles are processed. The pick pose is
 # found live by the detection node, so it is NOT listed here.
 TILE_TARGETS: dict[int, tuple] = {
-    1: (1.20, 0.30, 0.05),
-    2: (1.20, 0.10, 0.05),
-    3: (1.20, -0.10, 0.05),
+    1: (0.25, 0.10, 0.05),
+    2: (0.25, 0.00, 0.05),
+    3: (0.25, -0.10, 0.05),
 }
 
-# How long to wait for each phase before declaring it failed (seconds).
 NAV_TIMEOUT = 60.0
 DETECT_TIMEOUT = 10.0
 GRASP_TIMEOUT = 30.0
@@ -149,8 +148,9 @@ class Orchestrator(Node):
     def drop(self, tile_id: int) -> bool:
         x, y, z = TILE_TARGETS[tile_id]
         pt = PointStamped()
-        pt.header.frame_id = 'map'
-        pt.header.stamp = self.get_clock().now().to_msg()
+        pt.header.frame_id = 'base_link'
+        # Zero stamp = "use the latest available transform"
+        pt.header.stamp = rclpy.time.Time().to_msg()
         pt.point.x, pt.point.y, pt.point.z = float(x), float(y), float(z)
         return self._run_action(self.drop_cli, DropTile.Goal(pos=pt), 'drop')
 
