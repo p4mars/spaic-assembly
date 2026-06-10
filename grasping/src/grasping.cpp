@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <functional>
 #include <map>
 #include <memory>
@@ -34,8 +35,10 @@ const std::map<std::string, double> carry_pose = {
   {"wrist_joint", -1.55},
 };
 
-// Height of the approach/retreat point straight above the tile [m].
+// Height of the approach point straight above the tile [m].
 constexpr double kApproachHeight = 0.03;
+// Lowest the gripper_center is allowed to go in base_link [m]; tile positions are clamped up to this.
+constexpr double kMinTileZ = 0.022;
 }
 
 class TileGrasping
@@ -252,6 +255,7 @@ private:
     std::optional<std::map<std::string, double>> approach, grasp;
     try {
       auto tile_base = tf_buffer_.transform(tile, "base_link", tf2::durationFromSec(0.3)).point;
+      tile_base.z = std::max(tile_base.z, kMinTileZ);
       grasp = solve_ik(tile_base);
       tile_base.z += kApproachHeight;
       approach = solve_ik(tile_base);
@@ -325,6 +329,7 @@ private:
     std::optional<std::map<std::string, double>> approach, place;
     try {
       auto tile_base = tf_buffer_.transform(tile, "base_link", tf2::durationFromSec(0.3)).point;
+      tile_base.z = std::max(tile_base.z, kMinTileZ);
       place = solve_ik(tile_base);
       tile_base.z += kApproachHeight;
       approach = solve_ik(tile_base);
