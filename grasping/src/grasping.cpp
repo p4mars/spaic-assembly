@@ -52,7 +52,7 @@ public:
       // "joint name", {lower_limit, upper_limit, lower_tolerance, upper_tolerance}
       {"shoulder_pan_joint", {-M_PI / 2.0, M_PI / 2.0, 0.01, 0.01}},
       {"shoulder_lift_joint", {-M_PI / 2.0, M_PI / 2.0, 0.0, 0.0}},
-      {"elbow_joint", {-M_PI / 2.0, M_PI / 2.0, 0.01, 0.01}},
+      {"elbow_joint", {-1.7, M_PI / 2.0, 0.01, 0.01}},
       {"wrist_joint", {-M_PI / 2.0, M_PI / 2.0, 0.02, 0.02}},
     }),
     arm_interface_(node_, "mirte_arm"),
