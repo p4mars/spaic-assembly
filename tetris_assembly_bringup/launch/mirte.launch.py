@@ -24,4 +24,4 @@ def generate_launch_description():
         )
     )
 
-    return LaunchDescription([slam_launch, grasping_launch, detection_launch, navigation_launch])
+    return LaunchDescription([slam_launch, grasping_launch, detection_launch])
