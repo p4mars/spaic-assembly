@@ -18,6 +18,8 @@ ros2 action send_goal /drop_tile grasping/action/DropTile "{pos: {header: {frame
 ros2 service call /move_to_detection_pose std_srvs/srv/Trigger
 ```
 
+Works e.g. for base_link in the line from {x: 0.28, y: 0.0, z: -0.1} to {x: 0.34, y: 0.0, z: -0.1}
+
 ## How it works
 The arm is a 4-DOF chain (`shoulder_pan`, `shoulder_lift`, `elbow`, `wrist`). The
 analytic IK in [`include/grasping/custom_4dof_ik.hpp`](include/grasping/custom_4dof_ik.hpp)
