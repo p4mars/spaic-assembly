@@ -26,8 +26,8 @@ class MoveToLocation(Node):
     # that the /move_to service consumes. Add entries for whatever
     # markers your construction task uses.
     MARKER_ID_TO_LABEL = {
-        1: 'pickup',
-        2: 'goal',
+        9: 'pickup',
+        0: 'goal',
     }
     # Discard a cached pose if it's older than this when the marker-id
     # announcement arrives (race protection).
@@ -92,9 +92,20 @@ class MoveToLocation(Node):
         self.current_pose = msg.pose.pose
 
     def _on_marker_pose(self, msg: PoseStamped):
-        """Cache every pose that comes in. We commit it on the next
-        /detection/found_marker_id announcement."""
-        self._latest_pose = msg
+    self._latest_pose = msg
+    # Workaround: their code currently encodes marker_id in position.z
+    marker_id = int(round(msg.pose.position.z))
+    if marker_id in self.MARKER_ID_TO_LABEL:
+        label = self.MARKER_ID_TO_LABEL[marker_id]
+        stored = PoseStamped()
+        stored.header = msg.header
+        stored.pose = msg.pose
+        stored.pose.position.z = 0.0   # zero it out so Nav2 doesn't try to fly
+        self.dynamic_locations[label] = stored
+        self.get_logger().info(
+            f"Stored '{label}' (id={marker_id}) at "
+            f"({stored.pose.position.x:.3f}, {stored.pose.position.y:.3f})"
+        )
 
     def _on_marker_found(self, msg: Int32):
         """
