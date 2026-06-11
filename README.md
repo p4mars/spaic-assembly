@@ -49,3 +49,8 @@ ros2 launch orchestration orchestrator.launch.py
 - to quit: `ros2 topic pub --once /orchestrator/control std_msgs/String "data: 'q'"`
 
 ## bringup (Frank)
+Launch files for easier startup and defining recommended machine where the node should run (although that is flexible):
+```bash
+ros2 launch bringup mirte.launch.py # on the Mirte Robot via SSH
+ros2 launch bringup pc.launch.py # on the PC/laptop (ROS2 Humble, same network and ROS_DOMAIN_ID as Mirte required)
+```
