@@ -67,7 +67,8 @@ class Orchestrator(Node):
         # --- detection --------------------------------------------------
         self.target_pub = self.create_publisher(
             Int32MultiArray, '/detection/target_marker_ids', 10)
-        self._want_id = None
+        self._want_ids: set[int] = set()
+        self._last_id: int | None = None
         self._last_pose: PoseStamped | None = None
         self._found = threading.Event()
         self.create_subscription(
@@ -95,7 +96,9 @@ class Orchestrator(Node):
             self._nav_done.set()
 
     def _on_marker_pose(self, msg: PoseStamped):
-        if int(msg.pose.position.z) == self._want_id:
+        mid = int(msg.pose.position.z)
+        if mid in self._want_ids:
+            self._last_id = mid
             self._last_pose = msg
             self._found.set()
 
@@ -130,18 +133,19 @@ class Orchestrator(Node):
             return False
         return self._nav_ok
 
-    def detect(self, tile_id: int) -> PoseStamped | None:
-        """Ask detection to look for `tile_id`, return its map-frame pose."""
-        self._want_id = tile_id
+    def detect(self, tile_ids: set[int]) -> tuple[int, PoseStamped] | None:
+        """Ask detection to look for any of `tile_ids`; return (id, pose) of first found."""
+        self._want_ids = tile_ids
+        self._last_id = None
         self._last_pose = None
         self._found.clear()
-        self.target_pub.publish(Int32MultiArray(data=[tile_id]))
+        self.target_pub.publish(Int32MultiArray(data=list(tile_ids)))
         found = self._found.wait(timeout=DETECT_TIMEOUT)
         self.target_pub.publish(Int32MultiArray(data=[]))  # stop searching
         if not found:
-            self.get_logger().warn(f"tile {tile_id} not detected")
+            self.get_logger().warn(f"no tile from {tile_ids} detected")
             return None
-        return self._last_pose
+        return (self._last_id, self._last_pose)
 
     def pick(self, pose: PoseStamped | None) -> bool:
         if pose is None:
@@ -165,31 +169,62 @@ class Orchestrator(Node):
     # Mission loop
     # ==================================================================
     def run_mission(self):
-        tiles = list(TILE_TARGETS.keys())
-        self.get_logger().info(f"Mission: {len(tiles)} tiles -> {tiles}")
-        for tile_id in tiles:
-            self.get_logger().info(f"===== Tile {tile_id} =====")
-            pose: dict = {}
-            ok = (
-                self._step(f"navigate to '{PICK_LOCATION}'",
-                           lambda: self.navigate(PICK_LOCATION))
-                and self._step(f"detect tile {tile_id}",
-                               lambda: self._detect_into(tile_id, pose))
-                and self._step(f"pick tile {tile_id}",
-                               lambda: self.pick(pose.get('pose')))
-                and self._step(f"navigate to '{DROP_LOCATION}'",
-                               lambda: self.navigate(DROP_LOCATION))
-                and self._step(f"drop tile {tile_id}",
-                               lambda: self.drop(tile_id))
-            )
-            if not ok:
+        remaining: set[int] = set(TILE_TARGETS.keys())
+        self.get_logger().info(f"Mission: {len(remaining)} tiles -> {sorted(remaining)}")
+
+        while remaining:
+            detected: dict = {}
+
+            if not self._step(f"navigate to '{PICK_LOCATION}'",
+                              lambda: self.navigate(PICK_LOCATION)):
                 self.get_logger().warn("Mission aborted by operator.")
                 return
+
+            if not self._step(f"detect any tile from {sorted(remaining)}",
+                              lambda: self._detect_any(remaining, detected)):
+                self.get_logger().warn("Mission aborted by operator.")
+                return
+
+            tile_id: int = detected['id']
+            self.get_logger().info(f"===== Processing tile {tile_id} =====")
+
+            # Re-detect just before each pick attempt so an operator can move a
+            # tile closer and retry without getting a stale pose.
+            if not self._step(f"pick tile {tile_id}",
+                              lambda tid=tile_id: self._fresh_detect_and_pick(tid)):
+                self.get_logger().warn("Mission aborted by operator.")
+                return
+
+            remaining.discard(tile_id)
+
+            if not self._step(f"navigate to '{DROP_LOCATION}'",
+                              lambda: self.navigate(DROP_LOCATION)):
+                self.get_logger().warn("Mission aborted by operator.")
+                return
+
+            if not self._step(f"drop tile {tile_id}",
+                              lambda tid=tile_id: self.drop(tid)):
+                self.get_logger().warn("Mission aborted by operator.")
+                return
+
+            self.get_logger().info(f"Tile {tile_id} done. Remaining: {sorted(remaining)}")
+
         self.get_logger().info("===== Mission complete =====")
 
-    def _detect_into(self, tile_id: int, store: dict) -> bool:
-        store['pose'] = self.detect(tile_id)
-        return store['pose'] is not None
+    def _detect_any(self, tile_ids: set[int], out: dict) -> bool:
+        result = self.detect(tile_ids)
+        if result is None:
+            return False
+        out['id'], out['pose'] = result
+        return True
+
+    def _fresh_detect_and_pick(self, tile_id: int) -> bool:
+        """Re-detect `tile_id` for a fresh pose, then pick. Used so that retrying
+        pick after moving the tile will use its updated position."""
+        result = self.detect({tile_id})
+        if result is None:
+            return False
+        return self.pick(result[1])
 
     # ==================================================================
     # Helpers
