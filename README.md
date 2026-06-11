@@ -4,11 +4,12 @@
 <img src="mirte_grasping_tetris_tile.jpeg" width="400" alt="mirte_grasping_tetris_tile"/>
 
 # Packages:
-## data_collection (Frank)
+## data_collection (Frank) 
+Provides:
 - arm_teleop
 - data_collector
 
-See details in `data_collection/README.md`
+See details in [data_collection/README.md](data_collection/README.md)
 
 ## slam (Frank)
 Run with:
@@ -18,7 +19,7 @@ ros2 launch slam slam.launch.py
 
 Publishes an occupancy grid on `/map_lidar` and the `map -> odom` transform using `slam_toolbox`.
 
-save map on the Mirte with 
+Save map on the Mirte with:
 ```bash
 ros2 run nav2_map_server map_saver_cli -t /map_lidar \
   -f /home/mirte/mirte_ws/src/mirte_navigation/maps/default
@@ -31,9 +32,14 @@ TODO
 TODO
 
 ## grasping (Frank)
-- providing `/pick_tile`, `drop_tile` actions and the `move_to_detection_pose` service
+Run with:
+```bash
+ros2 launch grasping grasping.launch.py
+```
 
-See details in `grasping/README.md`
+Providing `/pick_tile`, `drop_tile` actions and the `move_to_detection_pose` service
+
+See details in [grasping/README.md](grasping/README.md)
 
 ## orchestration (Frank)
 Run with:
