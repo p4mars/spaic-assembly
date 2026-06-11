@@ -1,9 +1,7 @@
 # tetris-assembly
 **Group 4 of the 2026 edition of the "AE4ASM527 - Spatial AI for Industrial Automation" course at TU Delft**
 
-![mirte_grasping_tetris_tile](mirte_grasping_tetris_tile.jpeg)
-
-TODO: Add picture
+<img src="mirte_grasping_tetris_tile.jpeg" width="400" alt="mirte_grasping_tetris_tile"/>
 
 # Packages:
 ## data_collection
