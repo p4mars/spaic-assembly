@@ -18,7 +18,7 @@ ros2 action send_goal /drop_tile grasping/action/DropTile "{pos: {header: {frame
 ros2 service call /move_to_detection_pose std_srvs/srv/Trigger
 ```
 
-Works e.g. for base_link in the line from {x: 0.28, y: 0.0, z: -0.1} to {x: 0.34, y: 0.0, z: -0.1}
+Kinametics/joint constraints yield a quite narrow range of possible coordinates e.g. for base_link and straigth to the front it works from {x: 0.28, y: 0.0, z: -0.1} to {x: 0.34, y: 0.0, z: -0.1}.
 
 ## How it works
 The arm is a 4-DOF chain (`shoulder_pan`, `shoulder_lift`, `elbow`, `wrist`). The
@@ -28,29 +28,12 @@ placed from straight above. `shoulder_pan` sets the azimuth, `shoulder_lift` + `
 solve a planar 2-link problem (elbow-up branch), and `wrist` keeps the last link
 vertical. The resulting joint targets are commanded with MoveIt's `setJointValueTarget`.
 
+The initial approch position (3 cm above the target position) is not used anymore as it did not really provide any benefit due to the low precision of the arm.
+The code is still present in the `grasping.cpp` and just commented out.
+
 ### Fixed/hardcoded poses
-- `detection_pose`: gripper raised and pitched so the camera looks down at the
-  workspace to detect tiles; the drop action returns here.
-- `carry_pose`: arm tucked high above the base to carry a grasped tile safely; the
-  pick action returns here.
-
-### Action: Pick tile (`/pick_tile`)
-The goal carries the tile position in `pos` (any TF frame via `pos.header.frame_id`,
-e.g. `map`, `odom`, `base_link`). The server first runs IK for the tile itself **and**
-for an approach point 3 cm straight above it; if either is unreachable it aborts
-**before moving**. Otherwise it opens the gripper, moves to the approach point, lowers
-straight down onto the tile, closes the gripper, lifts back to the approach point, and
-finally moves to the `carry_pose`.
-
-### Action: Drop tile (`/drop_tile`)
-Same goal form. IK is again solved up-front for the drop position and the 3 cm
-approach point above it, aborting before any motion if either is infeasible. The arm
-then moves to the approach point, lowers to the drop position, opens the gripper,
-retreats back up, and finally moves to the `detection_pose`.
-
-### Service: Move to detection pose (`/move_to_detection_pose`)
-A `std_srvs/srv/Trigger` service that just moves the arm to the `detection_pose`
-(the same pose the drop action ends in), useful for re-detecting tiles between picks.
+- `detection_pose`
+- `carry_pose`
 
 ## Notes on joint state filter:
 - The launch starts a small joint state filter that republishes from `/joint_states` to `/joint_states_filtered` and drops any `_mimic` joints.
