@@ -4,13 +4,13 @@
 <img src="mirte_grasping_tetris_tile.jpeg" width="400" alt="mirte_grasping_tetris_tile"/>
 
 # Packages:
-## data_collection
+## data_collection (Frank)
 - arm_teleop
 - data_collector
 
 See details in `data_collection/README.md`
 
-## slam
+## slam (Frank)
 Run with:
 ```bash
 ros2 launch slam slam.launch.py
@@ -30,12 +30,12 @@ TODO
 ## detection
 TODO
 
-## grasping
+## grasping (Frank)
 - providing `/pick_tile`, `drop_tile` actions and the `move_to_detection_pose` service
 
 See details in `grasping/README.md`
 
-## orchestration
+## orchestration (Frank)
 Run with:
 ```bash
 ros2 launch orchestration orchestrator.launch.py
@@ -47,3 +47,5 @@ ros2 launch orchestration orchestrator.launch.py
 - to retry: `ros2 topic pub --once /orchestrator/control std_msgs/String "data: 'r'"`
 - to skip: `ros2 topic pub --once /orchestrator/control std_msgs/String "data: 's'"`
 - to quit: `ros2 topic pub --once /orchestrator/control std_msgs/String "data: 'q'"`
+
+## bringup (Frank)
