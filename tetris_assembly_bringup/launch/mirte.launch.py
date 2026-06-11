@@ -14,6 +14,7 @@ def generate_launch_description():
         )
 
     return LaunchDescription([
+        include("mirte_navigation", "launch", "minimal_navigation_launch.py"),
         include("grasping",   "launch", "grasping.launch.py"),
         include("navigation", "launch", "navigation.launch.py"),
     ])
