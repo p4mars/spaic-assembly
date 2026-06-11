@@ -24,8 +24,8 @@ namespace
 const std::map<std::string, double> detection_pose = {
   {"shoulder_pan_joint", 0.0},
   {"shoulder_lift_joint", 0.2},
-  {"elbow_joint", -1.1},
-  {"wrist_joint", -1.5},
+  {"elbow_joint", -1.4},
+  {"wrist_joint", -1.55},
 };
 
 const std::map<std::string, double> carry_pose = {
