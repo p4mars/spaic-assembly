@@ -5,10 +5,14 @@ TODO: Add picture
 
 # Packages:
 ## slam
-- uses slam_toolbox
-- publishes occupancy map under `map_lidar` and map->base_link TF2 transform
+Run with:
+```bash
+ros2 launch slam slam.launch.py
+```
 
-save map with 
+Publishes an occupancy grid on `/map_lidar` and the `map -> odom` transform using `slam_toolbox`.
+
+save map on the Mirte with 
 ```bash
 ros2 run nav2_map_server map_saver_cli -t /map_lidar \
   -f /home/mirte/mirte_ws/src/mirte_navigation/maps/default
