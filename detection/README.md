@@ -58,7 +58,7 @@ The MIRTE Master URDF defines the gripper camera frame as `gripper_camera_link`.
 
 The correct upstream fix was pushed to `mirte-ros-packages` partway through the project, too late to safely pull and rebuild on the physical robot before the exam.
 
-**Workaround:** A static transform publisher is included in the launch file that manually links `default_cam` to `wrist` using the exact physical offset defined in the URDF (see [mirte-ros-package/../arm.xarco](https://github.com/mirte-robot/mirte-ros-packages/blob/main/mirte_description/mirte_master_description/urdf/arm.xacro)
+**Workaround:** A static transform publisher is included in the launch file that manually links `default_cam` to `wrist` using the exact physical offset defined in the URDF (see [mirte-ros-package/../arm.xacro](https://github.com/mirte-robot/mirte-ros-packages/blob/main/mirte_description/mirte_master_description/urdf/arm.xacro)
   lines 587–593):
 
 ```xml
@@ -157,3 +157,34 @@ ros2 topic pub --once /detection/target_marker_ids std_msgs/Int32MultiArray "dat
 
 An empty set means no markers are processed.
 
+---
+
+
+## Grid Analysis – Proof of Concept (`test_grid.py`)
+
+`test_grid.py` is a proof-of-concept for the grid occupancy analysis. It is not implemented into the ROS and does not communicate with any ROS nodes (yet). It takes a single image file as input and outputs an occupancy grid directly to the terminal and as a debug image.
+
+The script detects the ArUco marker in the image, uses `solvePnP` to recover the camera pose, and projects a configurable 5×5 grid into the image plane using the calibrated camera intrinsics. Each cell is sampled in HSV space to determine whether a blue Tetris block is present or if the cell is empty.
+
+**Usage:**
+```bash
+python3 occupancy_grid.py --image ../compressed_img.jpeg
+```
+
+**Example output:**
+```
+Occupancy (O=occupied, .=empty):
+  O  O  O  O  O
+  O  O  O  O  .
+  O  O  O  .  .
+  O  O  O  O  O
+  O  .  .  O  O
+
+Missing cells: [(1, 4), (2, 3), (2, 4), (4, 1), (4, 2)]
+```
+
+| Input image | Debug overlay |
+|---|---|
+| ![Input](compressed_img.jpeg) | ![Debug](detection/occupancy_grid_debug.jpg) |
+
+Green dots indicate occupied cells, red dots indicate empty cells. The cyan grid lines are projected from the marker's coordinate frame into the image using the calibrated camera matrix.

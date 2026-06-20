@@ -1,0 +1,18 @@
+nth_image_detection:
+  ros__parameters:
+
+    # -- Image source --
+    image_topic: '/gripper_camera/image_raw/compressed'
+    use_compressed_img: true
+
+    # -- Camera info --
+    use_hardcoded_camera_info: true
+    camera_info_topic: '/gripper_camera/camera_info'
+
+    # Calibrated intrinsics (used when use_hardcoded_camera_info is true)
+    fallback_camera_k: [827.01, 0.0, 306.50, 0.0, 817.84, 221.24, 0.0, 0.0, 1.0]
+    fallback_camera_d: [-1.147382, 21.242253, 0.013422, 0.000006, -147.716365]
+
+    # -- Detection --
+    process_every_n: 6
+    aruco_dict: 'DICT_4X4_1000'

@@ -1,10 +1,26 @@
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
+from launch_ros.descriptions import ParameterFile
+from launch_ros.substitutions import FindPackageShare
+
 
 def generate_launch_description():
+    detection_params_file = LaunchConfiguration("detection_params_file")
+
+    declare_detaction_params_file_cmd = DeclareLaunchArgument(
+        "detection_params_file",
+        default_value=PathJoinSubstitution(
+            [FindPackageShare("detection"), "config", "detection.yaml"]
+        ),
+        description="Full path to the detection parameter file.",
+    )
+
     detection_node = Node(
         package='detection',
         executable='detection',
+        parameters=[ParameterFile(detection_params_file, allow_substs=True)],
         name='detection',
         output='screen',
     )
@@ -35,5 +51,6 @@ def generate_launch_description():
 
     ld = LaunchDescription()
     ld.add_action(static_tf)
+    ld.add_action(declare_detaction_params_file_cmd)
     ld.add_action(detection_node)
     return ld

@@ -47,6 +47,7 @@ ros2 topic pub --once /detection/target_marker_ids std_msgs/Int32MultiArray "dat
 See details in [detection/README.md](detection/README.md)
 
 Also contains a Proof of Concept for Grid Detection.
+
 <img src="grid_detection.png" width="400" alt="grid_detection"/>
 
 ## grasping (Frank)
