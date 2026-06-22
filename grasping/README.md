@@ -20,6 +20,18 @@ ros2 service call /move_to_detection_pose std_srvs/srv/Trigger
 
 Kinametics/joint constraints yield a quite narrow range of possible coordinates e.g. for base_link and straigth to the front it works from {x: 0.28, y: 0.0, z: -0.1} to {x: 0.34, y: 0.0, z: -0.1}.
 
+## Requirements
+You need to add the definition of the gripper_center link and corresponding joint to `mirte-ros-packages/mirte_description/mirte_master_description/urdf/arm.xacro` file as this code expects TF2 transforms for it which are published based on it.
+
+```
+<joint name="gripper_center_joint" type="fixed">
+    <origin xyz="0.0967 0 0" rpy="3.14159 0 0" />
+    <parent link="wrist" />
+    <child link="gripper_center" />
+</joint>
+<link name="gripper_center" />
+```
+
 ## How it works
 The arm is a 4-DOF chain (`shoulder_pan`, `shoulder_lift`, `elbow`, `wrist`). The
 analytic IK in [`include/grasping/custom_4dof_ik.hpp`](include/grasping/custom_4dof_ik.hpp)
